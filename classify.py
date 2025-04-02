@@ -21,7 +21,7 @@ MAX_TOKENS = 2047
 best_features = open("model/features.txt").read().strip().split("\n")
 
 # Load davinci tokenizer
-enc = tiktoken.encoding_for_model("davinci")
+enc = tiktoken.encoding_for_model("gpt-4o-mini")
 
 # Load model
 model = pickle.load(open("model/model", "rb"))
@@ -42,32 +42,47 @@ print("Loading Trigram...")
 
 trigram_model = train_trigram()
 
-trigram = np.array(score_ngram(doc, trigram_model, enc.encode, n=3, strip_first=False))
-unigram = np.array(score_ngram(doc, trigram_model.base, enc.encode, n=1, strip_first=False))
-
-response = openai.Completion.create(
-    model="ada",
-    prompt="<|endoftext|>" + doc,
-    max_tokens=0,
-    echo=True,
-    logprobs=1,
+# Convert subwords to token IDs for trigram scoring
+response = openai.ChatCompletion.create(
+    model="gpt-4o-mini", 
+    messages=[{"role": "user", "content": doc}],
+    logprobs=True,
+    temperature=0.0,
 )
-ada = np.array(list(map(lambda x: np.exp(x), response["choices"][0]["logprobs"]["token_logprobs"][1:])))
 
-response = openai.Completion.create(
-    model="davinci",
-    prompt="<|endoftext|>" + doc,
-    max_tokens=0,
-    echo=True,
-    logprobs=1,
-)
-davinci = np.array(list(map(lambda x: np.exp(x), response["choices"][0]["logprobs"]["token_logprobs"][1:])))
+subwords = [x["token"] for x in response["choices"][0]["logprobs"]["content"][1:]]
 
-subwords = response["choices"][0]["logprobs"]["tokens"][1:]
 gpt2_map = {"\n": "Ċ", "\t": "ĉ", " ": "Ġ"}
 for i in range(len(subwords)):
     for k, v in gpt2_map.items():
         subwords[i] = subwords[i].replace(k, v)
+
+ada = np.array(list(map(lambda x: np.exp(x["logprob"]), response["choices"][0]["logprobs"]["content"][1:])))
+davinci = ada
+
+# Calculate trigram and unigram scores using subwords
+trigram_scores = []
+unigram_scores = []
+
+# Add padding tokens for trigram context
+padded_subwords = [50256, 50256] + subwords
+
+# Score each position
+for i in range(len(subwords)):
+    trigram_context = padded_subwords[i:i+3]
+    unigram_context = [padded_subwords[i+2]]
+    
+    trigram_scores.append(trigram_model.n_gram_probability(trigram_context))
+    unigram_scores.append(trigram_model.base.n_gram_probability(unigram_context))
+
+trigram = np.array(trigram_scores)
+unigram = np.array(unigram_scores)
+
+print(ada.shape)
+print(davinci.shape) 
+print(unigram.shape)
+print(trigram.shape)
+print(subwords.__len__())
 
 t_features = t_featurize_logprobs(davinci, ada, subwords)
 
@@ -84,13 +99,23 @@ for exp in best_features:
     exp_tokens = get_words(exp)
     curr = vector_map[exp_tokens[0]]
 
-    for i in range(1, len(exp_tokens)):
+    for i in range(1, len(exp_tokens) - 1):  # Adjusted to prevent index out of range
         if exp_tokens[i] in vec_functions:
-            next_vec = vector_map[exp_tokens[i+1]]
+            next_vec = vector_map[exp_tokens[i + 1]]
             curr = vec_functions[exp_tokens[i]](curr, next_vec)
         elif exp_tokens[i] in scalar_functions:
             exp_features.append(scalar_functions[exp_tokens[i]](curr))
             break
+
+# Ensure the last token is processed if it's a scalar function
+if exp_tokens[-1] in scalar_functions:
+    exp_features.append(scalar_functions[exp_tokens[-1]](curr))
+
+print("-=-=-=-")
+print(len(t_features))
+print(len(exp_features))
+print(mu.shape)
+print(sigma.shape)
 
 data = (np.array(t_features + exp_features) - mu) / sigma
 preds = model.predict_proba(data.reshape(-1, 1).T)[:, 1]
