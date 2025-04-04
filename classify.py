@@ -56,24 +56,22 @@ trigram = np.array(score_ngram(doc, trigram_model, enc.encode, n=3, strip_first=
 unigram = np.array(score_ngram(doc, trigram_model.base, enc.encode, n=1, strip_first=False))
 
 response = openai.Completion.create(
+    model="babbage-002",
+    prompt="<|endoftext|>" + doc,
+    max_tokens=0,
+    echo=True,
+    logprobs=1,
+)
+babbage = np.array(list(map(lambda x: np.exp(x), response["choices"][0]["logprobs"]["token_logprobs"][1:])))
+
+response = openai.Completion.create(
     model="davinci-002",
     prompt="<|endoftext|>" + doc,
     max_tokens=0,
     echo=True,
     logprobs=1,
 )
-ada = np.array(list(map(lambda x: np.exp(x), response["choices"][0]["logprobs"]["token_logprobs"][1:])))
-
-# response = openai.Completion.create(
-#     model="davinci-002",
-#     prompt="<|endoftext|>" + doc,
-#     max_tokens=0,
-#     echo=True,
-#     logprobs=1,
-# )
-# davinci = np.array(list(map(lambda x: np.exp(x), response["choices"][0]["logprobs"]["token_logprobs"][1:])))
-
-davinci = ada
+davinci = np.array(list(map(lambda x: np.exp(x), response["choices"][0]["logprobs"]["token_logprobs"][1:])))
 
 subwords = response["choices"][0]["logprobs"]["tokens"][1:]
 gpt2_map = {"\n": "Ċ", "\t": "ĉ", " ": "Ġ"}
@@ -81,18 +79,18 @@ for i in range(len(subwords)):
     for k, v in gpt2_map.items():
         subwords[i] = subwords[i].replace(k, v)
 
-t_features = t_featurize_logprobs(davinci, ada, subwords)
+t_features = t_featurize_logprobs(davinci, babbage, subwords)
 
 vector_map = {
     "davinci-logprobs": davinci,
-    "ada-logprobs": ada,
+    "ada-logprobs": babbage,    # We have to call this ada for compatibility with the rest of the code
     "trigram-logprobs": trigram,
     "unigram-logprobs": unigram
 }
 
 print("t_features.shape", len(t_features))
 print("davinci.shape", davinci.shape)
-print("ada.shape", ada.shape)
+print("babbage.shape", babbage.shape)
 print("trigram.shape", trigram.shape)
 print("unigram.shape", unigram.shape)
 
