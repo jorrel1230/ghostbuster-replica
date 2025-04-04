@@ -64,14 +64,16 @@ response = openai.Completion.create(
 )
 ada = np.array(list(map(lambda x: np.exp(x), response["choices"][0]["logprobs"]["token_logprobs"][1:])))
 
-response = openai.Completion.create(
-    model="davinci-002",
-    prompt="<|endoftext|>" + doc,
-    max_tokens=0,
-    echo=True,
-    logprobs=1,
-)
-davinci = np.array(list(map(lambda x: np.exp(x), response["choices"][0]["logprobs"]["token_logprobs"][1:])))
+# response = openai.Completion.create(
+#     model="davinci-002",
+#     prompt="<|endoftext|>" + doc,
+#     max_tokens=0,
+#     echo=True,
+#     logprobs=1,
+# )
+# davinci = np.array(list(map(lambda x: np.exp(x), response["choices"][0]["logprobs"]["token_logprobs"][1:])))
+
+davinci = ada
 
 subwords = response["choices"][0]["logprobs"]["tokens"][1:]
 gpt2_map = {"\n": "Ċ", "\t": "ĉ", " ": "Ġ"}
