@@ -88,12 +88,11 @@ vector_map = {
     "unigram-logprobs": unigram
 }
 
-print("t_features.shape", len(t_features))
-print("davinci.shape", davinci.shape)
-print("babbage.shape", babbage.shape)
-print("trigram.shape", trigram.shape)
-print("unigram.shape", unigram.shape)
-
+# print("t_features.shape", len(t_features))
+# print("davinci.shape", davinci.shape)
+# print("babbage.shape", babbage.shape)
+# print("trigram.shape", trigram.shape)
+# print("unigram.shape", unigram.shape)
 
 exp_features = []
 for exp in best_features:
