@@ -50,15 +50,13 @@ nltk.download('brown')
 In order to run a standalone text through Ghostbuster, we provide a `classify.py` file with the following usage:
 
 ```
-python3 classify.py --file INPUT_FILE_HERE --openai_key OPENAI_KEY
+python3 classify.py --file INPUT_FILE_HERE
 ```
 
-To run the experiment files, create a file called `openai.config` in the main directory with the following template:
-```javascript
-{
-    "organization": ORGANIZATION,
-    "api_key": API_KEY
-}
+Create a file called `.env` in the main directory with the following:
+```
+OPENAI_API_KEY=apikey
+LLAMA2_TOKEN=huggingfacetoken
 ```
 
 Then, you must generate the cached symbolic data file. This consists of a feature vector for every single feature found through our "symbolic search" method. Running these commands will create binary files in the root directory:
@@ -81,3 +79,13 @@ Ghostbuster’s training data, which consists of news, student essay, and creati
 </ul>
 
 No AI-generated text detector is 100% accurate; we strongly discourage incorporation of Ghostbuster into any systems that automatically penalize students or other writers for alleged usage of text generation without human intervention. Privacy: Please be aware that all inputs to Ghostbuster are sent to the OpenAI API, and we also save the inputs for internal testing purposes. Though we will not distribute the data publicly, we cannot guarantee the privacy of any inputs to Ghostbuster.
+
+## TODO
+
+Types of text to compare/classify:
+<ul> Human
+<li> ChatGPT baseline
+<li> run ChatGPT-generated text through commercially available humanizer
+<li> ChatGPT prompt: write pretending to be high schooler/community college student
+<li> ChatGPT prompt: "use word variety/simple language to avoid sounding AI generated"
+<ul> ChatGPT prompt: regenerate in different style of sample text, ie give a human sample as a writing style reference in the prompt

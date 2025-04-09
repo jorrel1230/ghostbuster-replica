@@ -1,5 +1,6 @@
 import os
 import argparse
+import dotenv
 
 from utils.featurize import convert_file_to_logprob_file, get_logprobs
 from utils.load import Dataset, get_generate_dataset
@@ -55,8 +56,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--feature_select", action="store_true")
 parser.add_argument("--classify", action="store_true")
 
+dotenv.load_dotenv()
+llama2_token = os.getenv("LLAMA2_TOKEN")
 args = parser.parse_args()
-tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf", token=llama2_token)
 
 sentences = brown.sents()
 

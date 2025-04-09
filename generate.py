@@ -8,6 +8,7 @@ import nltk
 import numpy as np
 import string
 import torch
+import dotenv
 
 from nltk.corpus import wordnet
 from datasets import load_dataset
@@ -29,8 +30,9 @@ from utils.load import Dataset, get_generate_dataset
 nltk.download("wordnet")
 nltk.download("omw-1.4")
 
-
-llama_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
+dotenv.load_dotenv()
+llama2_token = os.getenv("LLAMA2_TOKEN")
+llama_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf", token=llama2_token)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
@@ -522,10 +524,10 @@ if __name__ == "__main__":
 
     if args.logprob_llama:
         print("Loading LLAMA...")
-        # llama_7b = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf").to(
+        # llama_7b = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf", token=llama2_token).to(
         #     device
         # )
-        llama_13b = AutoModelForCausalLM.from_pretrained("TheBloke/Llama-2-13B-AWQ").to(
+        llama_13b = AutoModelForCausalLM.from_pretrained("TheBloke/Llama-2-13B-AWQ", token=llama2_token).to(
             device
         )
         print("LLAMA Loaded")

@@ -5,11 +5,15 @@ import tiktoken
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer
+import os
+import dotenv
 
+dotenv.load_dotenv()
+llama2_token = os.getenv("LLAMA2_TOKEN")
 
 tokenizer = tiktoken.encoding_for_model("davinci")
 
-llama_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
+llama_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf", token=llama2_token)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 vocab_map = {}
