@@ -196,7 +196,6 @@ ghostbuster_stats.ipynb
 *.ipynb
 
 temp
-data
 rebuttal.py
 .DS_Store
 trigram_model.pkl
