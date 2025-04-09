@@ -23,6 +23,8 @@ for file in "${text_files[@]}"; do
         
         # Prompt user for selection
         echo ""
+        echo "Currently selected: ${#selected_files[@]} files"
+        echo "-----------------------------------------------------------"
         read -p "Save this file? (y/n): " choice
         
         # Check user's choice
