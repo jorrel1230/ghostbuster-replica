@@ -1,4 +1,5 @@
 #!/bin/bash
+# This script allows the user to hand-pick 100 prompts from the set of prompts in the current directory, efficiently.
 
 # Initialize an empty array to store text files and selected files
 text_files=(*.txt)
