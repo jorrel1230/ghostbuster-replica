@@ -1,5 +1,10 @@
-# Bash script compatible version of classify.py
-# Jorrel Rajan
+# experiment-classify.py
+# Author: Jorrel Rajan
+#
+# Args:
+#   --dir <dir> : directory from which to take input examples
+#   --output <output file name> : output file, csv formatted as filename, prediction
+
 
 import numpy as np
 import dill as pickle
@@ -17,7 +22,7 @@ from utils.symbolic import train_trigram, get_words, vec_functions, scalar_funct
 parser = argparse.ArgumentParser()
 parser.add_argument("--dir", type=str, default="experiment-samples")
 parser.add_argument("--openai_key", type=str, default="")
-parser.add_argument("--output", type=str, default="output.txt", help="Output file for predictions")
+parser.add_argument("--output", type=str, default="output.csv", help="Output file for predictions")
 args = parser.parse_args()
 
 if args.openai_key != "":
@@ -43,11 +48,16 @@ sigma = pickle.load(open("model/sigma", "rb"))
 if os.path.exists("trigram_model.pkl"):
     trigram_model = pickle.load(open("trigram_model.pkl", "rb"))
 else:
-    trigram_model = train_trigram()
+    trigram_model = train_trigram() 
     pickle.dump(trigram_model, open("trigram_model.pkl", "wb"))
 
 # Open output file
 with open(args.output, 'w') as output_file:
+    
+    output_line = 'file, prediction'
+    output_file.write(output_line + '\n')
+    print(output_line)
+
     for file in os.listdir(args.dir):
         file_path = os.path.join(args.dir, file)
         # Load data and featurize
@@ -109,6 +119,6 @@ with open(args.output, 'w') as output_file:
         data = (np.array(t_features + exp_features) - mu) / sigma
         preds = model.predict_proba(data.reshape(-1, 1).T)[:, 1]
 
-        output_line = f"{file} : {preds}"
+        output_line = f"{file}, {preds}"
         print(output_line)
         output_file.write(output_line + "\n")
