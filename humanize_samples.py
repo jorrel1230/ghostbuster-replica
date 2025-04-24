@@ -8,7 +8,7 @@
 #   --output_dir <output dir> : name of directory to put outputs in
 #   --prompt_file <prompt file> : name of text file containing specific prompt to use
 
-from openai import OpenAI
+import openai
 import argparse
 import dotenv
 import os
@@ -23,7 +23,7 @@ args = parser.parse_args()
 dotenv.load_dotenv()
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI()
+openai.api_key = openai_api_key
 
 # Make new dir
 dir = os.mkdir(args.output_dir)
@@ -40,6 +40,7 @@ for file in os.listdir(args.dir):
     with open(file_path) as f:
         doc = f.read().strip()
 
+        """
         # call gpt endpoint
         response = client.responses.create(
             model="gpt-4.1-nano",
@@ -58,8 +59,14 @@ for file in os.listdir(args.dir):
             top_p=1,
             store=False
         )
+        """
 
-        output_doc = response.output_text
+        response = openai.ChatCompletion.create(
+            model="gpt-4.1-nano",
+            messages=[{'role': 'user','content': f'<instruction>\n{prompt}\n</instruction>\n<original_text>\n{doc}\n</original_text>'}],
+        )
+        
+        output_doc = response['choices'][0]['message']['content']
 
         write_file_path = os.path.join(f"{args.output_dir}", file)
         with open(write_file_path, 'w') as f:
