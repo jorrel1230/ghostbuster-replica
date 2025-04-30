@@ -12,11 +12,13 @@ import openai
 import argparse
 import dotenv
 import os
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--dir", type=str)
-parser.add_argument("--output_dir", type=str)
-parser.add_argument("--prompt_file", type=str)
+parser.add_argument("--input_essay_dir", "-i", type=str)
+parser.add_argument("--input_prompt_dir", "-p", type=str)
+parser.add_argument("--output_dir", "-o", type=str)
+parser.add_argument("--prompt_file", "-f", type=str)
 
 
 args = parser.parse_args()
@@ -34,40 +36,30 @@ with open(args.prompt_file) as f:
     prompt = f.read().strip()
 
 # Main Loop
-for file in os.listdir(args.dir):
-    file_path = os.path.join(args.dir, file)
+for file in tqdm(os.listdir(args.input_essay_dir)):
+    essay_file_path = os.path.join(args.input_essay_dir, file)
+
+    # assumes prompt file has same name as essay file
+    essay_prompt_file_path = os.path.join(args.input_prompt_dir, file) 
+
     # Load data and featurize
-    with open(file_path) as f:
-        doc = f.read().strip()
+    essay_text = ""
+    essay_prompt = ""
 
-        """
-        # call gpt endpoint
-        response = client.responses.create(
-            model="gpt-4.1-nano",
-            input=[
-                {"role": "user", "content": f'<instruction>\n{prompt}\n</instruction>\n<original_text>\n{doc}\n</original_text>'}
-            ],
-            text={
-                "format": {
-                    "type": "text"
-                }
-            },
-            reasoning={},
-            tools=[],
-            temperature=1,
-            max_output_tokens=2048,
-            top_p=1,
-            store=False
-        )
-        """
+    with open(essay_file_path) as f:
+        essay_text = f.read().strip()
+    with open(essay_prompt_file_path) as f:
+        essay_prompt = f.read().strip()
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4.1-nano",
-            messages=[{'role': 'user','content': f'<instruction>\n{prompt}\n</instruction>\n<original_text>\n{doc}\n</original_text>'}],
-        )
-        
-        output_doc = response['choices'][0]['message']['content']
+    gpt_input_prompt = f"<instruction>\n{prompt}\n</instruction>\n<original_prompt>\n{essay_prompt}\n<original_prompt>\n<original_text>\n{essay_text}\n</original_text>"
 
-        write_file_path = os.path.join(f"{args.output_dir}", file)
-        with open(write_file_path, 'w') as f:
-            f.write(output_doc)
+    response = openai.ChatCompletion.create(
+        model="gpt-4.1-nano",
+        messages=[{'role': 'user','content': gpt_input_prompt}],
+    )
+    
+    output_doc = response['choices'][0]['message']['content']
+
+    write_file_path = os.path.join(f"{args.output_dir}", file)
+    with open(write_file_path, 'w') as f:
+        f.write(output_doc)
