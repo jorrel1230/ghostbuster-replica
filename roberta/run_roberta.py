@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import argparse
 import math
 import numpy as np
@@ -32,18 +36,18 @@ domains = ["wp", "reuter", "essay"]
 roberta_tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
 wp_dataset = [
-    Dataset("normal", "../data/wp/human"),
-    Dataset("normal", "../data/wp/gpt"),
+    Dataset("normal", "./data/wp/human"),
+    Dataset("normal", "./data/wp/gpt_writing"),
 ]
 
 reuter_dataset = [
-    Dataset("author", "../data/reuter/human"),
-    Dataset("author", "../data/reuter/gpt"),
+    Dataset("author", "./data/reuter/human"),
+    Dataset("author", "./data/reuter/gpt_writing"),
 ]
 
 essay_dataset = [
-    Dataset("normal", "../data/essay/human"),
-    Dataset("normal", "../data/essay/gpt"),
+    Dataset("normal", "./data/essay/human"),
+    Dataset("normal", "./data/essay/gpt_writing"),
 ]
 
 
