@@ -9,6 +9,8 @@ import torch
 import tqdm
 import csv
 
+print("importing transformers")
+
 from transformers import (
     RobertaTokenizer,
     RobertaForSequenceClassification,
