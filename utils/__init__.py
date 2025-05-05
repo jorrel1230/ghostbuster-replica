@@ -1,5 +1,5 @@
 import openai
-# from .write_logprobs import *
+from .write_logprobs import *
 from .featurize import *
 from .n_gram import *
 
