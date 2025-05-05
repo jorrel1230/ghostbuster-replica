@@ -313,3 +313,11 @@ if __name__ == "__main__":
             "Perplexity-Only",
             train_perplexity,
         )
+
+    if len(results_table) > 1:
+        # Write data to output csv file
+        with open(args.output_file, "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(results_table)
+
+        print(f"Saved results to {args.output_file}")

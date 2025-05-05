@@ -11,7 +11,7 @@ def get_logprobs(file):
     """
     logprobs = []
 
-    with open(file) as f:
+    with open(file, encoding='utf-8') as f:
         for line in f.read().strip().split("\n"):
             line = line.split(" ")
             logprobs.append(np.exp(-float(line[1])))
@@ -23,7 +23,7 @@ def get_tokens(file):
     """
     Returns a list of all tokens from a given logprobs file
     """
-    with open(file) as f:
+    with open(file, encoding='utf-8') as f:
         tokens = list(map(lambda x: x.split(" ")[0], f.read().strip().split("\n")))
     return tokens
 

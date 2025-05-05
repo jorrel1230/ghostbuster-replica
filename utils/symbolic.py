@@ -145,7 +145,7 @@ def get_all_logprobs(
         if "logprobs" in file:
             continue
 
-        with open(file, "r") as f:
+        with open(file, "r", encoding='utf-8') as f:
             doc = preprocess(f.read())
         davinci_logprobs[file] = get_logprobs(
             convert_file_to_logprob_file(file, "davinci")
@@ -160,6 +160,13 @@ def get_all_logprobs(
 
     return davinci_logprobs, ada_logprobs, trigram_logprobs, unigram_logprobs
 
+MAX_TOKENS = 2047
+def fixlen(v, n=MAX_TOKENS):
+    if len(v) > n:
+        return v[:n]
+    if len(v) < n:
+        return np.pad(v, 0, n-len(v))
+    return v
 
 def generate_symbolic_data(
     generate_dataset,
@@ -181,10 +188,10 @@ def generate_symbolic_data(
         ) = get_all_logprobs(generate_dataset, preprocess=preprocess, verbose=verbose)
 
         vector_map = {
-            "davinci-logprobs": lambda file: davinci_logprobs[file],
-            "ada-logprobs": lambda file: ada_logprobs[file],
-            "trigram-logprobs": lambda file: trigram_logprobs[file],
-            "unigram-logprobs": lambda file: unigram_logprobs[file],
+            "davinci-logprobs": lambda file: fixlen(davinci_logprobs[file]),
+            "ada-logprobs": lambda file: fixlen(ada_logprobs[file]),
+            "trigram-logprobs": lambda file: fixlen(trigram_logprobs[file]),
+            "unigram-logprobs": lambda file: fixlen(unigram_logprobs[file]),
         }
 
         all_funcs = backtrack_functions(max_depth=max_depth)
