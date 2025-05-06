@@ -167,7 +167,6 @@ bard.config
 *.wp_target
 
 gptzero.ipynb
-symbolic_data
 symbolic_data_four
 
 input.txt
@@ -176,7 +175,6 @@ results.csv
 question.csv
 answer.csv
 playground.ipynb
-t_data
 
 data/wp/raw
 data/reuter/raw
